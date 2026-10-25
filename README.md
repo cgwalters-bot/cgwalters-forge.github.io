@@ -2,6 +2,21 @@
 
 # cgwalters-forge.github.io
 
-The organization site at <https://cgwalters-forge.github.io/>: a hand-written homepage describing how the first-party projects fit together, extending the organization README. It is built with [Zola](https://www.getzola.org/) and deployed to GitHub Pages by `.github/workflows/site.yml`, which also builds and checks every pull request.
+The organization site at <https://cgwalters-forge.github.io/>: a hand-written homepage describing how the first-party projects fit together, extending the organization README, and the weekly notes at `/blog/`. It is built with [Zola](https://www.getzola.org/) and deployed to GitHub Pages by `.github/workflows/site.yml`, which also builds and checks every pull request.
 
-The homepage is not a list of repositories; GitHub already shows those. Update it, `templates/index.html`, when the architecture changes. To preview locally, `zola serve`; before pushing, `zola build && zola check --skip-external-links`, as CI runs them, with the Zola version `site.yml` pins.
+The homepage is not a list of repositories; GitHub already shows those. Update it, `templates/index.html`, when the architecture changes. To preview locally, `zola serve`; before pushing, `zola build && zola check --skip-external-links`, as CI runs them, with the Zola version `site.yml` pins. The homepage is plain HTML with its own styles; the blog's templates (`templates/base.html` and the rest) copy its palette.
+
+## Adding a post
+
+A post is one Markdown file, `content/blog/YYYY-MM-DD.md`, with a title and date in its front matter:
+
+```markdown
++++
+title = "Week ending 2026-11-01"
+date = 2026-11-01
++++
+
+The post, in Markdown.
+```
+
+Posts are Markdown only: CI fails on raw HTML (a tag, comment or `<script>` outside code), since the posts are written by agent runs and served on an origin other pages trust. The blog index lists posts newest first, and `/blog/atom.xml` is their feed. Each Sunday, tracker's `weekly-blog.yml` files an issue here with the week's material and dispatches a run that writes the post as a pull request.

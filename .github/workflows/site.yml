@@ -50,6 +50,87 @@ jobs:
           mkdir "$RUNNER_TEMP/zola"
           tar -xzf "$tarball" -C "$RUNNER_TEMP/zola"
           echo "$RUNNER_TEMP/zola" >> "$GITHUB_PATH"
+      # Posts are written by agent runs, and Zola renders inline HTML as it
+      # is, on an origin that other pages trust (tracker#917). So a post may
+      # hold no HTML: outside fenced code blocks and inline code spans, any
+      # `<` that starts a tag, comment or processing instruction fails.
+      # Markdown autolinks such as <https://...> pass. The program checks
+      # itself on known cases first.
+      - name: Refuse raw HTML in posts
+        env:
+          # Prints FILE:LINE: TEXT for each offending line; fails if any.
+          # Plain POSIX awk, as Ubuntu's mawk runs it.
+          RAW_HTML: |
+            # The line less its code spans: a run of N backticks up to the
+            # next run of exactly N. An unmatched run is literal text.
+            function strip(s,    out, n, tail, closed) {
+              out = ""
+              while (match(s, /`+/)) {
+                n = RLENGTH
+                out = out substr(s, 1, RSTART - 1)
+                s = substr(s, RSTART + n)
+                tail = s
+                closed = 0
+                while (match(tail, /`+/)) {
+                  if (RLENGTH == n) { s = substr(tail, RSTART + n); closed = 1; break }
+                  tail = substr(tail, RSTART + RLENGTH)
+                }
+              }
+              return out s
+            }
+            FNR == 1 { fence = "" }
+            match($0, /^ ? ? ?(```|~~~)/) {
+              mark = substr($0, RSTART, RLENGTH); sub(/^ */, "", mark)
+              if (fence == "") { fence = mark; next }
+              if (substr(mark, 1, 1) == substr(fence, 1, 1)) { fence = ""; next }
+            }
+            fence != "" { next }
+            {
+              line = strip($0)
+              if (line ~ /<(!|\?|\/?[A-Za-z][A-Za-z0-9-]*([[:space:]\/>]|$))/) {
+                print FILENAME ":" FNR ": " $0
+                bad = 1
+              }
+            }
+            END { exit bad }
+          # One offending line each.
+          BAD: |
+            <script>alert(1)</script>
+            x <iframe src="https://example.com">
+            a <a href="https://example.com">link</a>
+            <img src=x onerror=alert(1)>
+            <!-- hidden -->
+            </div>
+            <svg/onload=alert(1)>
+            <style>
+            text `code` then <b>bold</b>
+            `unclosed <i>tag
+          # Code, autolinks and plain comparisons, which pass.
+          GOOD: |
+            Plain text, a < b and 3<4, <https://example.com>.
+            Inline `<script>` and ``a `<b>` c`` are code.
+            ```html
+            <script>fenced</script>
+            ```
+            ~~~
+            <iframe>
+            ~~~
+        run: |
+          cases="$RUNNER_TEMP/raw-html-cases"
+          mkdir -p "$cases"
+          while IFS= read -r bad; do
+            [[ -n "$bad" ]] || continue
+            printf '%s\n' "$bad" > "$cases/bad.md"
+            if awk "$RAW_HTML" "$cases/bad.md" > /dev/null; then
+              echo "::error::the raw HTML check passes a post with: $bad"
+              exit 1
+            fi
+          done <<< "$BAD"
+          printf '%s' "$GOOD" > "$cases/good.md"
+          awk "$RAW_HTML" "$cases/good.md" ||
+            { echo "::error::the raw HTML check refuses code or plain text"; exit 1; }
+          find content/blog -name '*.md' -exec awk "$RAW_HTML" {} + ||
+            { echo "::error::posts may not contain raw HTML; use Markdown, or code spans for literal tags"; exit 1; }
       - run: zola build
       # Internal links and anchors only: the posts link to many GitHub
       # pages, which are slow and rate-limited to check on every change.

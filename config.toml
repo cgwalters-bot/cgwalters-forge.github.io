@@ -2,8 +2,17 @@ base_url = "https://cgwalters-forge.github.io"
 title = "cgwalters-forge"
 description = "Projects for running coding agents, and ordinary CI, on GitHub Actions with a hardened host."
 default_language = "en"
+# The feed's author of every post: the weekly notes are written by the bot.
+author = "cgwalters-bot"
 compile_sass = false
 build_search_index = false
+# Only the blog section has a feed (content/blog/_index.md).
+feed_filenames = ["atom.xml"]
+
+[markdown]
+# Weekly posts link to many issues and pull requests on GitHub.
+external_links_no_follow = true
+external_links_no_referrer = true
 
 [link_checker]
 internal_level = "error"
