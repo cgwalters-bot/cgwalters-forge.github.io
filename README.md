@@ -2,6 +2,6 @@
 
 # cgwalters-forge.github.io
 
-The organization site at <https://cgwalters-forge.github.io/>: one hand-written `index.html` summarizing the first-party projects, served by GitHub Pages from `main` with no build step.
+The organization site at <https://cgwalters-forge.github.io/>: a hand-written homepage describing how the first-party projects fit together, extending the organization README. It is built with [Zola](https://www.getzola.org/) and deployed to GitHub Pages by `.github/workflows/site.yml`, which also builds and checks every pull request.
 
-When a first-party project is added, renamed or gets its own site, update its entry here.
+The homepage is not a list of repositories; GitHub already shows those. Update it, `templates/index.html`, when the architecture changes. To preview locally, `zola serve`; before pushing, `zola build && zola check --skip-external-links`, as CI runs them, with the Zola version `site.yml` pins.

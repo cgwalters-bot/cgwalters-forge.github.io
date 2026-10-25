@@ -1,0 +1,9 @@
+base_url = "https://cgwalters-forge.github.io"
+title = "cgwalters-forge"
+description = "Projects for running coding agents, and ordinary CI, on GitHub Actions with a hardened host."
+default_language = "en"
+compile_sass = false
+build_search_index = false
+
+[link_checker]
+internal_level = "error"
