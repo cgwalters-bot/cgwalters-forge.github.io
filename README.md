@@ -19,4 +19,4 @@ date = 2026-11-01
 The post, in Markdown.
 ```
 
-Posts are Markdown only: CI fails on raw HTML (a tag, comment or `<script>` outside code), since the posts are written by agent runs and served on an origin other pages trust. The blog index lists posts newest first, and `/blog/atom.xml` is their feed. Each Sunday, tracker's `weekly-blog.yml` files an issue here with the week's material and dispatches a run that writes the post as a pull request.
+Posts are Markdown only: CI fails on raw HTML (a tag, comment or `<script>` outside code), since the posts are written by agent runs and served on an origin other pages trust. The blog index lists posts newest first, and `/blog/atom.xml` is their feed. Every pull request here gets the organization's agent review (`.github/workflows/review.yml`, with its task in `workflow/review.md`), which for a post checks it against the issue's material and refuses raw HTML or anything that must not be published. Each Sunday, tracker's `weekly-blog.yml` files an issue here with the week's material and dispatches a run that writes the post as a pull request.
