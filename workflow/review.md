@@ -39,6 +39,8 @@ a pull request each of these is a blocker:
   undisclosed fix, or an infrastructure host: a host or tailnet name, an IP
   address, an internal URL or port. Check every repository it names or
   links is public.
+- It states a budget or spend figure (a dollar amount, a weekly cap, a
+  pool's usage percentage). Saying a budget exists is fine.
 - It states something the issue's material does not support, or that the
   public pull requests and issues it links do not show: a release, a
   merge, an outage, a number, a cause. Check each highlight, lowlight and
