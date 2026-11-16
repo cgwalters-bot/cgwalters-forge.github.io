@@ -29,8 +29,9 @@ A weekly post is a pull request that closes an issue titled `Weekly notes:
 week ending YYYY-MM-DD`. Read that issue's body: it is the post's material,
 the board's changes and the project's status updates of that week. For such
 a pull request each of these is a blocker:
-- It changes anything but adding one file, `content/blog/YYYY-MM-DD.md`, with
-  the date of the issue's title, front matter giving that title and date.
+- It changes anything but adding one file, `content/blog/posts/YYYY-MM-DD.md`,
+  with the date of the issue's title, YAML front matter giving that title and
+  date.
 - The post holds raw HTML anywhere outside code: a tag, comment, `<script`,
   `<iframe`, an event handler attribute, or an HTML entity used to build one.
   Markdown only. Also a link whose target is not `https:` (`javascript:`,

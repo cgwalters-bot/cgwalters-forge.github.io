@@ -1,4 +1,4 @@
-"""Check homepage navigation after running zola build."""
+"""Check homepage navigation after running zensical build."""
 
 from html.parser import HTMLParser
 from pathlib import Path
