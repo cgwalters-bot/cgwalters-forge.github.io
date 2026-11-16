@@ -1,0 +1,49 @@
+[project]
+site_url = "https://cgwalters-forge.github.io/"
+site_name = "cgwalters-forge"
+site_description = "Projects for running coding agents, and ordinary CI, on GitHub Actions with a hardened host."
+# The feed's author of every post: the weekly notes are written by the bot.
+site_author = "cgwalters-bot"
+# content/index.html, the hand-written homepage, is copied as it is.
+docs_dir = "content"
+site_dir = "public"
+copyright = """Maintained by <a href="https://github.com/cgwalters">cgwalters</a>, \
+with most changes written by <a href="https://github.com/cgwalters-bot">cgwalters-bot</a>. \
+Source: <a href="https://github.com/cgwalters-forge/cgwalters-forge.github.io">cgwalters-forge.github.io</a>."""
+
+[project.theme]
+language = "en"
+# No web fonts: the site loads nothing from other origins.
+font = false
+# Only main.html, for the notice and the feed link on every blog page.
+custom_dir = "overrides"
+
+# Posts are content/blog/posts/YYYY-MM-DD.md, served at /blog/YYYY-MM-DD/
+# as under Zola.
+[project.plugins.blog]
+post_dir = "{blog}/posts"
+post_url_format = "{file}"
+archive = false
+
+# The feed keeps Zola's URL, /blog/atom.xml, though it is now RSS 2.0.
+[project.plugins.rss]
+match_path = "blog/posts/.*"
+date_from_meta.as_creation = "date"
+json_feed_enabled = false
+feed_title = "cgwalters-forge - Weekly notes"
+# Whole posts, and all of them, as Zola's feed had.
+abstract_chars_count = -1
+length = 1000
+# The default rss.xsl is linked relative to the feed, which is not at the root.
+stylesheet = ""
+feeds_filenames.rss_created = "blog/atom.xml"
+
+# As Zola's build_search_index = false.
+[project.plugins.search]
+enabled = false
+
+# Weekly posts link to many issues and pull requests on GitHub. With
+# assets off, this only marks external links, as Zola's config did.
+[project.plugins.privacy]
+assets = false
+links_attr_map = { rel = "nofollow noreferrer" }
