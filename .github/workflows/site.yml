@@ -1,4 +1,4 @@
-# Builds the site with Zola and checks its internal links on every pull
+# Builds the site with Zensical and checks its internal links on every pull
 # request and push; on main, deploys it to GitHub Pages. The shape is
 # agent-board's site.yml: the build job is read-only and hardened by
 # secure-host, and only deploy holds the Pages grant and the OIDC
@@ -23,10 +23,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+# Zensical is pinned with hashes in site-requirements.txt.
 env:
-  ZOLA_VERSION: 0.23.6
+  LYCHEE_VERSION: 0.24.2
   # The release asset's digest as GitHub lists it.
-  ZOLA_SHA256: 8f5132b3522412d04e395e0b25f6d68613ad272a873e54a2b3ebf664873024a4
+  LYCHEE_SHA256: 1f4e0ef7f6554a6ed33dd7ac144fb2e1bbed98598e7af973042fc5cd43951c9a
 
 jobs:
   build:
@@ -41,17 +42,22 @@ jobs:
       # No step runs between the checkout and secure-host. Pinned by
       # commit, as in agent-board's site.yml.
       - uses: cgwalters-forge/actions/secure-host@4642b4f3a2803489a2714f5e1211371b24150fdc # main, with secure-host:v0.6.3
-      - name: Install Zola
+      - name: Install Zensical
         run: |
-          tarball="$RUNNER_TEMP/zola.tar.gz"
+          python3 -m venv "$RUNNER_TEMP/zensical"
+          "$RUNNER_TEMP/zensical/bin/pip" install --require-hashes --only-binary=:all: -r site-requirements.txt
+          echo "$RUNNER_TEMP/zensical/bin" >> "$GITHUB_PATH"
+      - name: Install lychee
+        run: |
+          tarball="$RUNNER_TEMP/lychee.tar.gz"
           curl -fsSL --proto '=https' -o "$tarball" \
-            "https://github.com/getzola/zola/releases/download/v${ZOLA_VERSION}/zola-v${ZOLA_VERSION}-x86_64-unknown-linux-gnu.tar.gz"
-          echo "${ZOLA_SHA256}  ${tarball}" | sha256sum -c -
-          mkdir "$RUNNER_TEMP/zola"
-          tar -xzf "$tarball" -C "$RUNNER_TEMP/zola"
-          echo "$RUNNER_TEMP/zola" >> "$GITHUB_PATH"
-      # Posts are written by agent runs, and Zola renders inline HTML as it
-      # is, on an origin that other pages trust (tracker#917). So a post may
+            "https://github.com/lycheeverse/lychee/releases/download/lychee-v${LYCHEE_VERSION}/lychee-x86_64-unknown-linux-gnu.tar.gz"
+          echo "${LYCHEE_SHA256}  ${tarball}" | sha256sum -c -
+          mkdir "$RUNNER_TEMP/lychee"
+          tar -xzf "$tarball" -C "$RUNNER_TEMP/lychee" --strip-components=1
+          echo "$RUNNER_TEMP/lychee" >> "$GITHUB_PATH"
+      # Posts are written by agent runs, and Zensical renders inline HTML as
+      # it is, on an origin that other pages trust (tracker#917). So a post may
       # hold no HTML: outside fenced code blocks and inline code spans, any
       # `<` that starts a tag, comment or processing instruction fails.
       # Markdown autolinks such as <https://...> pass. The program checks
@@ -131,10 +137,10 @@ jobs:
             { echo "::error::the raw HTML check refuses code or plain text"; exit 1; }
           find content/blog -name '*.md' -exec awk "$RAW_HTML" {} + ||
             { echo "::error::posts may not contain raw HTML; use Markdown, or code spans for literal tags"; exit 1; }
-      - run: zola build
+      - run: zensical build --strict
       # Internal links and anchors only: the posts link to many GitHub
       # pages, which are slow and rate-limited to check on every change.
-      - run: zola check --skip-external-links
+      - run: lychee --offline --root-dir "$PWD/public" --index-files index.html --include-fragments --no-progress public
       - if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
