@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 {% block announce %}This text is LLM generated.{% endblock %}
 {% block extrahead %}
+{#- The theme's bundle loads scripts from CDNs, unpinned, for Mermaid fences
+    and old browsers; allow only its own scripts and inline bootstrap. -#}
+<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
 <link rel="alternate" type="application/rss+xml" title="cgwalters-forge weekly notes" href="/blog/atom.xml">
 {% endblock %}
