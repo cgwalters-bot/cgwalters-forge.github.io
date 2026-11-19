@@ -18,6 +18,17 @@ font = false
 # Only main.html, for the notice and the feed link on every blog page.
 custom_dir = "overrides"
 
+# Zola's Markdown features, replacing Zensical's defaults. Not attr_list: its
+# { onclick=... } would let a post add event handlers without raw HTML.
+[project.markdown_extensions.toc]
+permalink = true
+[project.markdown_extensions.tables]
+[project.markdown_extensions.footnotes]
+[project.markdown_extensions."pymdownx.tilde"]
+[project.markdown_extensions."pymdownx.tasklist"]
+[project.markdown_extensions."pymdownx.highlight"]
+[project.markdown_extensions."pymdownx.superfences"]
+
 # Posts are content/blog/posts/YYYY-MM-DD.md, served at /blog/YYYY-MM-DD/
 # as under Zola.
 [project.plugins.blog]
