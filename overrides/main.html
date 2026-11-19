@@ -1,8 +1,33 @@
 {% extends "base.html" %}
+{% block site_meta %}
+{#- The theme does not escape front matter, which YAML can decode into any
+    markup, nor a title taken from the first heading. Fail the build without
+    a title, on keys beyond the ones posts need and the blog plugin's
+    template and hide, or on a value that HTML escaping changes. Only pages
+    that extend this template are checked: a post's own template key skips
+    it, so tests/test_content.py checks front matter in source first. -#}
+{%- if page.meta and not page.meta.title %}
+  {{- front_matter_needs_a_title() }}
+{%- elif page.title and (page.title | string | escape | string) != (page.title | string) %}
+  {{- page_title_needs_html_escaping() }}
+{%- endif %}
+{%- for key, value in (page.meta or {}) | items %}
+  {%- if key not in ["title", "date", "description", "template", "hide"] %}
+    {{- unexpected_front_matter_key(key) }}
+  {%- elif key in ["title", "date", "description"] and (value | string | escape | string) != (value | string) %}
+    {{- front_matter_value_needs_html_escaping(key) }}
+  {%- endif %}
+{%- endfor %}
+{#- First, before anything the page renders. The theme's bundle loads scripts
+    from CDNs, unpinned, for Mermaid fences and old browsers; allow only its
+    own file and its inline bootstrap: the scope script at each page depth
+    (/blog/, its posts, 404.html, /blog/page/N/), then the palette and tabbed scripts.
+    These depend on the theme's version and the page depths; after changing
+    either, run tests/test_csp.py on the build. -#}
+<meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; script-src 'self' 'sha256-N/RTvwLEC2qawj00/afCaoBV5pOVU0QRghcAo6zTrz8=' 'sha256-pICGTaR6GUa5Ouzhvq5/btlVF7ouwlfFaxMsnvWMT8s=' 'sha256-FnzPjIa2+7LhDSWlbaMBEIPh+9rL3lPN6J/MWljUoE0=' 'sha256-tHc3EhlYs89vmQi82Ar8V5bd85ErhLkmLrn/3F2eSVg=' 'sha256-DrEMJJ29sL7vIloQzly+VUGMxKcBTMII+OfW7Y8AkG4=' 'sha256-/8wPdzX9q0NNJXyA5lzsLojXFpkeaXVxhbfkUOQaWy8='">
+{{ super() }}
+{% endblock %}
 {% block announce %}This text is LLM generated.{% endblock %}
 {% block extrahead %}
-{#- The theme's bundle loads scripts from CDNs, unpinned, for Mermaid fences
-    and old browsers; allow only its own scripts and inline bootstrap. -#}
-<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
 <link rel="alternate" type="application/rss+xml" title="cgwalters-forge weekly notes" href="/blog/atom.xml">
 {% endblock %}

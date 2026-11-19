@@ -4,15 +4,15 @@
 
 The organization site at <https://cgwalters-forge.github.io/>: a hand-written homepage describing how the first-party projects fit together, extending the organization README, and the weekly notes at `/blog/`. It is built with [Zensical](https://zensical.org/) (`zensical.toml`) and deployed to GitHub Pages by `.github/workflows/site.yml`, which also builds every pull request and checks its internal links with [lychee](https://lychee.cli.rs/).
 
-The homepage is not a list of repositories; GitHub already shows those. Update it, `content/index.html`, when the architecture changes; it is plain HTML with its own styles, copied as it is. To preview locally, install Zensical from `site-requirements.txt` into a virtual environment and run `zensical serve`; before pushing, run `zensical build --strict` and the lychee command `site.yml` runs, with the versions it pins.
+The homepage is not a list of repositories; GitHub already shows those. Update it, `content/index.html`, when the architecture changes; it is plain HTML with its own styles, copied as it is. To preview locally, install Zensical from `site-requirements.txt` into a virtual environment and run `zensical serve`; before pushing, run `zensical build --strict` and the lychee command `site.yml` runs, with the versions it pins, then `python3 -m unittest discover -s tests`.
 
 ## Adding a post
 
-A post is one Markdown file, `content/blog/posts/YYYY-MM-DD.md`, served at `/blog/YYYY-MM-DD/`, with a title and date in its YAML front matter:
+A post is one Markdown file, `content/blog/posts/YYYY-MM-DD.md`, served at `/blog/YYYY-MM-DD/`, with only the issue's title and the date in its YAML front matter, since the theme inserts front matter into pages unescaped:
 
 ```markdown
 ---
-title: "Week ending 2026-11-01"
+title: "Weekly notes: week ending 2026-11-01"
 date: 2026-11-01
 ---
 
